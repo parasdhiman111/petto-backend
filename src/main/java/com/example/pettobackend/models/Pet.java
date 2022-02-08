@@ -4,10 +4,12 @@ package com.example.pettobackend.models;
 import com.example.pettobackend.models.enums.Breed;
 import com.example.pettobackend.models.enums.Gender;
 import com.example.pettobackend.models.enums.PetCategory;
+import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(value = "pets")
+@Data
 public class Pet {
 
     @Id
