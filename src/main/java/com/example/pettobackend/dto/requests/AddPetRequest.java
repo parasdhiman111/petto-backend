@@ -6,7 +6,7 @@ import lombok.Data;
 public class AddPetRequest {
 
     private String petName;
-    private String petUserName;
+    //private String petUserName;
     private String petBreed;
     private String petCategory;
     private String petGender;

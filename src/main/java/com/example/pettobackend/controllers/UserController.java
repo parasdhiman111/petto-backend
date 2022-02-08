@@ -4,6 +4,7 @@ import com.example.pettobackend.dto.requests.LoginRequest;
 import com.example.pettobackend.dto.requests.SignupRequest;
 import com.example.pettobackend.dto.responses.JwtResponse;
 import com.example.pettobackend.dto.responses.MessageResponse;
+import com.example.pettobackend.dto.responses.UserDetailsResponse;
 import com.example.pettobackend.models.Role;
 import com.example.pettobackend.models.User;
 import com.example.pettobackend.models.enums.Gender;
@@ -13,10 +14,13 @@ import com.example.pettobackend.repositories.RoleRepository;
 import com.example.pettobackend.repositories.UserRepository;
 import com.example.pettobackend.security.jwt.JwtUtils;
 import com.example.pettobackend.security.services.UserDetailsImpl;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashSet;
 import java.util.List;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,6 +45,9 @@ public class UserController {
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Value("${paras.app.jwtSecret}")
+    public String jwtSecret;
 
     @Autowired
     private UserRepository userRepository;
@@ -105,6 +113,33 @@ public class UserController {
         newUser.setRoles(roles);
         userRepository.save(newUser);
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    @GetMapping("/user")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getCurrentUserDetails(@RequestHeader String authorization)
+    {
+        Optional<User> user=userRepository.findById(getUserIdFromToken(authorization.substring(7)));
+
+        if(user.isPresent())
+        {
+            UserDetailsResponse response=new UserDetailsResponse(
+                    user.get().getFirstName(),
+                    user.get().getLastName(),
+                    user.get().getEmail(),
+                    user.get().getGender().toString()
+            );
+
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("User not found"));
+    }
+
+
+    private String getUserIdFromToken(String token)
+    {
+        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getId();
     }
 
 

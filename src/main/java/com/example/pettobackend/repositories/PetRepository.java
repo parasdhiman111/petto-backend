@@ -10,7 +10,6 @@ import java.util.Optional;
 @Repository
 public interface PetRepository extends MongoRepository<Pet,String> {
 
-    Optional<Pet> findByPetUserName(String username);
     List<Pet> findAllByUserId(String userId);
 
 

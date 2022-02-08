@@ -2,6 +2,7 @@ package com.example.pettobackend.controllers;
 
 
 import com.example.pettobackend.dto.requests.AddPetRequest;
+import com.example.pettobackend.dto.responses.MessageResponse;
 import com.example.pettobackend.models.Pet;
 import com.example.pettobackend.models.enums.Breed;
 import com.example.pettobackend.models.enums.Gender;
@@ -27,9 +28,6 @@ public class PetController {
     @Autowired
     private PetRepository petRepository;
 
-    @Autowired
-    private JwtUtils jwtUtils;
-
     @Value("${paras.app.jwtSecret}")
     public String jwtSecret;
 
@@ -37,14 +35,14 @@ public class PetController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> addNewPet(@RequestHeader String authorization,@RequestBody AddPetRequest addPetRequest)
     {
-        if(petRepository.findByPetUserName(addPetRequest.getPetUserName()).isPresent())
-        {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already present");
-        }
+//        if(petRepository.findByPetUserName(addPetRequest.getPetUserName()).isPresent())
+//        {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse("Username already Present"));
+//        }
         Pet pet=new Pet();
         pet.setUserId(getUserIdFromToken(authorization.substring(7)));
         pet.setName(addPetRequest.getPetName());
-        pet.setPetUserName(addPetRequest.getPetUserName());
+        //pet.setPetUserName(addPetRequest.getPetUserName());
         pet.setBreed(Breed.valueOf(addPetRequest.getPetBreed()));
         pet.setPetCategory(PetCategory.valueOf(addPetRequest.getPetCategory()));
         pet.setGender(Gender.valueOf(addPetRequest.getPetGender()));
